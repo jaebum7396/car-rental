@@ -1,0 +1,169 @@
+classDiagram
+    %% DTOs - Left Side
+    class CarCreateRequest {
+        -String manufacturer
+        -String model
+        -Integer productionYear
+        -List~Long~ categoryIds
+    }
+
+    class CarUpdateRequest {
+        -String manufacturer
+        -String model
+        -Integer productionYear
+        -List~Long~ categoryIds
+    }
+
+    class CarResponse {
+        -Long id
+        -String manufacturer
+        -String model
+        -Integer productionYear
+        -boolean available
+        -List~CategoryResponse~ categories
+        +of(Car car)
+    }
+
+    class CategoryResponse {
+        -Long id
+        -String name
+        +of(Category category)
+    }
+
+    %% Core Domain - Center
+    class BaseTimeEntity {
+        <<abstract>>
+        -LocalDateTime createdAt
+        -LocalDateTime updatedAt
+    }
+
+    class Car {
+        -Long id
+        -String manufacturer
+        -String model
+        -Integer productionYear
+        -boolean available
+        -Set~Category~ categories
+        +create()
+        +update()
+        +changeAvailability()
+    }
+
+    class Category {
+        -Long id
+        -String name
+    }
+
+    class CarController {
+        -CarService carService
+        +registerCar()
+        +updateCar()
+        +findById()
+        +findBySearchCondition()
+        +changeAvailability()
+    }
+
+    class CarJpaRepository {
+        <<interface>>
+        +save()
+        +findById()
+        +findByIdWithCategories()
+    }
+
+    class CategoryJpaRepository {
+        <<interface>>
+        +save()
+        +findById()
+        +existsByName()
+    }
+
+    class CarRepositoryAdapter {
+        -CarJpaRepository carJpaRepository
+        -CarQueryRepository carQueryRepository
+        +save()
+        +findById()
+        +findBySearchCondition()
+    }
+
+    class CategoryRepositoryAdapter {
+        -CategoryJpaRepository categoryJpaRepository
+        +save()
+        +findById()
+        +existsByName()
+    }
+
+    class CarQueryRepository {
+        -JPAQueryFactory queryFactory
+        +findBySearchCondition()
+        +findByCategories()
+    }
+
+    class CarService {
+        <<interface>>
+        +registerCar()
+        +updateCar()
+        +findById()
+        +findBySearchCondition()
+        +changeAvailability()
+    }
+
+    class CarServiceImpl {
+        -CarRepository carRepository
+        -CategoryRepository categoryRepository
+    }
+
+    %% Exceptions - Right Side
+    class BusinessException {
+        <<exception>>
+        -ErrorCode errorCode
+        +getErrorCode()
+    }
+
+    class EntityNotFoundException {
+        <<exception>>
+        -ErrorCode errorCode
+        +getErrorCode()
+    }
+
+    class InvalidValueException {
+        <<exception>>
+        -ErrorCode errorCode
+        +getErrorCode()
+    }
+
+    class ErrorCode {
+        <<enumeration>>
+        CAR_NOT_FOUND
+        INVALID_CAR_STATUS
+        CATEGORY_NOT_FOUND
+        CATEGORY_REQUIRED
+        INVALID_INPUT_VALUE
+        +getMessage() String
+    }
+
+    %% Relationships
+    Car --|> BaseTimeEntity
+    Category --|> BaseTimeEntity
+    Car "1" *-- "many" Category
+    
+    BusinessException --> ErrorCode
+    EntityNotFoundException --|> BusinessException
+    InvalidValueException --|> BusinessException
+    
+    CarController --> CarService
+    CarServiceImpl ..|> CarService
+    CarServiceImpl --> CarRepositoryAdapter
+    CarServiceImpl --> CategoryRepositoryAdapter
+    
+    CarRepositoryAdapter --> CarJpaRepository
+    CarRepositoryAdapter --> CarQueryRepository
+    CategoryRepositoryAdapter --> CategoryJpaRepository
+
+    CarResponse --> Car
+    CategoryResponse --> Category
+    CarController ..> CarCreateRequest
+    CarController ..> CarUpdateRequest
+    CarController ..> CarResponse
+
+    %% Layout hints
+    direction LR
