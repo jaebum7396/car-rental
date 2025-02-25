@@ -1,7 +1,8 @@
 # 자동차 대여 시스템 - Car Rental Service
 
 ## 프로젝트 소개 - Introduction
-자동차 대여 관리를 위한 백엔드 애플리케이션입니다.
+헥사고날 아키텍쳐를 적용한 백엔드 애플리케이션입니다.
+자동차 렌탈 도메인을 가정하여 작성하였습니다.
 
 ## 개발 환경 - Development Environment
 * Java 17
